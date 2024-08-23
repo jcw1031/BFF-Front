@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Star, MapPin, ChevronLeft } from 'lucide-react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
+import {Search, ShoppingCart, Star, MapPin, ChevronLeft} from 'lucide-react';
 import LocationModal from './LocationModal';
 
 const RestaurantList = () => {
@@ -70,26 +70,26 @@ const RestaurantList = () => {
   const tabs = ['전체', '배달 99+', '포장 99+', '장보기.쇼핑 99+'];
 
   return (
-      <div className="max-w-md mx-auto bg-gray-100 min-h-screen">
-        <div className="sticky top-0 bg-white z-10">
-          <div className="flex items-center p-4 border-b">
-            <button className="mr-4">
-              <ChevronLeft size={24} />
-            </button>
-            <form onSubmit={handleSearch} className="flex-grow relative">
-              <input
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="검색어 입력"
-                  className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            </form>
-            <button className="ml-4">
-              <ShoppingCart size={24} />
-            </button>
-          </div>
+    <div className="max-w-md mx-auto bg-gray-100 min-h-screen">
+      <div className="sticky top-0 bg-white z-10">
+        <div className="flex items-center p-4 border-b">
+          <button className="mr-4">
+            <ChevronLeft size={24} />
+          </button>
+          <form onSubmit={handleSearch} className="flex-grow relative">
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="검색어 입력"
+              className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </form>
+          <button className="ml-4">
+            <ShoppingCart size={24} />
+          </button>
+        </div>
 
           <button
               onClick={() => setIsLocationModalOpen(true)}
@@ -134,7 +134,7 @@ const RestaurantList = () => {
                       <span className="text-sm font-medium">{restaurant.rating.toFixed(1)}</span>
                       <span className="text-sm text-gray-500 ml-1">({restaurant.reviewCount})</span>
                     </div>
-                    <p className="text-sm text-gray-500 mb-1">{restaurant.min}-{restaurant.max}분</p>
+                    {restaurant.max !== 0 && <p className="text-sm text-gray-500 mb-1">{restaurant.min}-{restaurant.max}분</p>}
                     <p className="text-sm text-gray-500">최소주문 {restaurant.minimumOrderAmount.toLocaleString()}원</p>
                   </div>
                   <div className="w-20 h-20 bg-gray-200 rounded-lg ml-4 flex-shrink-0"></div>
