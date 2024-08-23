@@ -1,20 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, ChevronLeft } from 'lucide-react';
+import { Search, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { koreaDistricts } from '../data/koreaDistricts';
+
+const flattenAddressData = (data) => {
+  return data.reduce((acc, province) => {
+    province.cities.forEach(city => {
+      city.districts.forEach(district => {
+        acc.push(`${province.name}_${city.name}_${district}`);
+      });
+    });
+    return acc;
+  }, []);
+};
+
+const flattenedAddresses = flattenAddressData(koreaDistricts);
 
 const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [locations] = useState([
-    '서울특별시_송파구_방이동',
-    '서울특별시_강남구_역삼동',
-    '서울특별시_마포구_합정동',
-    '서울특별시_종로구_종로1가',
-    '서울특별시_용산구_이태원동'
-  ]);
+  const [filteredAddresses, setFilteredAddresses] = useState([]);
 
-  const filteredLocations = locations.filter(location =>
-      location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const lowercaseSearchTerm = searchTerm.toLowerCase();
+    if (lowercaseSearchTerm.length > 1) {
+      const filtered = flattenedAddresses.filter(address =>
+          address.toLowerCase().includes(lowercaseSearchTerm)
+      );
+      setFilteredAddresses(filtered.slice(0, 100)); // Limit to 100 results for performance
+    } else {
+      setFilteredAddresses([]);
+    }
+  }, [searchTerm]);
+
+  const handleAddressSelect = (address) => {
+    onSelectLocation(address);
+    onClose();
+  };
 
   return (
       <div className="flex flex-col h-full bg-white">
@@ -23,12 +44,12 @@ const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) =
             <button onClick={onClose} className="mr-4">
               <ChevronLeft size={24} />
             </button>
-            <h2 className="text-lg font-bold">배달 위치 선택</h2>
+            <h2 className="text-lg font-bold">주소 검색</h2>
           </div>
           <div className="relative">
             <input
                 type="text"
-                placeholder="위치 검색..."
+                placeholder="도_시_구_동 형식으로 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-3 pl-10 border rounded-lg"
@@ -37,17 +58,14 @@ const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) =
           </div>
         </div>
         <ul className="flex-grow overflow-y-auto p-4">
-          {filteredLocations.map((location, index) => (
+          {filteredAddresses.map((address, index) => (
               <li
                   key={index}
-                  className="py-3 border-b last:border-b-0 flex items-center cursor-pointer hover:bg-gray-100"
-                  onClick={() => {
-                    onSelectLocation(location);
-                    onClose();
-                  }}
+                  className="py-3 border-b last:border-b-0 flex items-center justify-between cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleAddressSelect(address)}
               >
-                <MapPin className="mr-3" size={20} />
-                {location === currentLocation ? <strong>{location}</strong> : location}
+                <span>{address.replace(/_/g, ' ')}</span>
+                <ChevronRight size={20} />
               </li>
           ))}
         </ul>
