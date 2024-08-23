@@ -1,5 +1,54 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, ShoppingCart, Star } from 'lucide-react';
+import { Search, ShoppingCart, Star, MapPin } from 'lucide-react';
+
+// eslint-disable-next-line react/prop-types
+const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locations] = useState([
+    '서울특별시_송파구_방이동',
+    '서울특별시_강남구_역삼동',
+    '서울특별시_마포구_합정동',
+    '서울특별시_종로구_종로1가',
+    '서울특별시_용산구_이태원동'
+  ]);
+
+  const filteredLocations = locations.filter(location =>
+      location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-4 rounded-lg w-full max-w-md">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold">배달 위치 선택</h2>
+            <button onClick={onClose} className="text-gray-500">&times;</button>
+          </div>
+          <input
+              type="text"
+              placeholder="위치 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border rounded mb-4"
+          />
+          <ul>
+            {filteredLocations.map((location, index) => (
+                <li
+                    key={index}
+                    className="py-2 px-4 hover:bg-gray-100 cursor-pointer flex items-center"
+                    onClick={() => {
+                      onSelectLocation(location);
+                      onClose();
+                    }}
+                >
+                  <MapPin className="mr-2" size={16} />
+                  {location === currentLocation ? <strong>{location}</strong> : location}
+                </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+  );
+};
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -8,7 +57,10 @@ const RestaurantList = () => {
   const [keyword, setKeyword] = useState('치킨');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [deliveryLocation, setDeliveryLocation] = useState('서울특별시_송파구_방이동');
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const observer = useRef();
+
   const lastRestaurantElementRef = useCallback(node => {
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
@@ -23,7 +75,7 @@ const RestaurantList = () => {
   const fetchData = useCallback(async (page, searchKeyword) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=서울특별시_송파구_방이동&pageNumber=${page}`);
+      const response = await fetch(`/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=${deliveryLocation}&pageNumber=${page}`);
       const data = await response.json();
       if (data.success && Array.isArray(data.response)) {
         if (page === 0) {
@@ -41,7 +93,7 @@ const RestaurantList = () => {
       setHasMore(false);
     }
     setIsLoading(false);
-  }, []);
+  }, [deliveryLocation]);
 
   useEffect(() => {
     fetchData(pageNumber, keyword);
@@ -49,6 +101,14 @@ const RestaurantList = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setPageNumber(0);
+    setRestaurants([]);
+    setHasMore(true);
+    fetchData(0, keyword);
+  };
+
+  const handleLocationChange = (newLocation) => {
+    setDeliveryLocation(newLocation);
     setPageNumber(0);
     setRestaurants([]);
     setHasMore(true);
@@ -81,6 +141,22 @@ const RestaurantList = () => {
             <ShoppingCart className="h-6 w-6" />
           </button>
         </div>
+
+        <button
+            onClick={() => setIsLocationModalOpen(true)}
+            className="w-full mb-4 py-2 px-4 bg-white rounded-lg shadow flex items-center justify-center"
+        >
+          <MapPin className="mr-2" size={16} />
+          {deliveryLocation}
+        </button>
+
+        {isLocationModalOpen && (
+            <LocationSelectionPage
+                onSelectLocation={handleLocationChange}
+                currentLocation={deliveryLocation}
+                onClose={() => setIsLocationModalOpen(false)}
+            />
+        )}
 
         <div className="flex mb-4 border-b">
           {tabs.map((tab) => (
