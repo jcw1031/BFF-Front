@@ -3,9 +3,9 @@ import RestaurantList from './components/RestaurantList.jsx';
 
 function App() {
   return (
-      <div className="App">
-        <RestaurantList />
-      </div>
+    <div className="App">
+      <RestaurantList />
+    </div>
   );
 }
 
