@@ -1,18 +1,12 @@
-import './App.css'
-import styled from "styled-components";
-import {SearchHeader} from "./components/SearchHeader.jsx";
+import React from 'react';
+import RestaurantList from './components/RestaurantList.jsx';
 
 function App() {
   return (
-    <PageLayout>
-      <SearchHeader/>
-    </PageLayout>
-  )
+      <div className="App">
+        <RestaurantList />
+      </div>
+  );
 }
 
-export default App
-
-const PageLayout = styled.div`
-  width: 100%;
-  height: 100%;
-`
+export default App;
