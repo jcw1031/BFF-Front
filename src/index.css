@@ -70,3 +70,12 @@ button:focus-visible {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "Hanna";
+  src: url("./fonts/BMHANNAPro.ttf");
+}
+
+* {
+  font-family: Hanna, sans-serif !important;
+}

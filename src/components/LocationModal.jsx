@@ -7,7 +7,7 @@ const flattenAddressData = (data) => {
   return data.reduce((acc, province) => {
     province.cities.forEach(city => {
       city.districts.forEach(district => {
-        acc.push(`${province.name}_${city.name}_${district}`);
+        acc.push(`${province.name} ${city.name} ${district}`);
       });
     });
     return acc;
@@ -39,8 +39,8 @@ const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) =
 
   return (
       <div className="flex flex-col h-full bg-white">
-        <div className="sticky top-0 bg-white p-4 border-b z-10">
-          <div className="flex items-center mb-4">
+        <div className="sticky top-0 bg-white p-4 border-b z-10 ">
+          <div className="flex items-center mb-4 ">
             <button onClick={onClose} className="mr-4">
               <ChevronLeft size={24} />
             </button>
@@ -49,10 +49,12 @@ const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) =
           <div className="relative">
             <input
                 type="text"
-                placeholder="도_시_구_동 형식으로 검색..."
+                placeholder="핒 칰 컾 곝 슽"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-3 pl-10 border rounded-lg"
+                className="w-full p-3 pl-10 border rounded-lg
+                hover:outline-none hover:ring-2 hover:ring-teal-500 hover:border-teal-500
+                focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           </div>
@@ -61,7 +63,7 @@ const LocationSelectionPage = ({ onSelectLocation, currentLocation, onClose }) =
           {filteredAddresses.map((address, index) => (
               <li
                   key={index}
-                  className="py-3 border-b last:border-b-0 flex items-center justify-between cursor-pointer hover:bg-gray-100"
+                  className="py-3 border-b last:border-b-0 flex items-center justify-between cursor-pointer hover:bg-gray-100 "
                   onClick={() => handleAddressSelect(address)}
               >
                 <span>{address.replace(/_/g, ' ')}</span>

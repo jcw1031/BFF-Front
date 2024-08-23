@@ -42,3 +42,12 @@
 .read-the-docs {
   color: #888;
 }
+
+@font-face {
+  font-family: "Hanna";
+  src: url("./fonts/BMHANNAPro.ttf");
+}
+
+ * {
+  font-family: Hanna, sans-serif !important;
+}

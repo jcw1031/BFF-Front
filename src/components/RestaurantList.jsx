@@ -27,7 +27,9 @@ const RestaurantList = () => {
   const fetchData = useCallback(async (page, searchKeyword) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=${deliveryLocation}&pageNumber=${page}`);
+      const formattedDeliveryLocation = deliveryLocation.replace(/\s+/g, '_');
+      console.log(formattedDeliveryLocation);
+      const response = await fetch(`/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=${formattedDeliveryLocation}&pageNumber=${page}`);
       const data = await response.json();
       if (data.success && Array.isArray(data.response)) {
         if (page === 0) {
@@ -82,7 +84,7 @@ const RestaurantList = () => {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="검색어 입력"
-              className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100"
+              className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100 border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           </form>
@@ -93,7 +95,9 @@ const RestaurantList = () => {
 
           <button
               onClick={() => setIsLocationModalOpen(true)}
-              className="w-full py-3 px-4 bg-white border-b flex items-center justify-between"
+              className="w-full py-3 px-4 bg-white border-b flex items-center justify-between
+              hover:outline-none hover:ring-teal-500 hover:border-teal-500
+              focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           >
             <div className="flex items-center">
               <MapPin className="mr-2" size={20} />
@@ -101,12 +105,13 @@ const RestaurantList = () => {
             </div>
             <ChevronLeft className="transform rotate-180" size={20} />
           </button>
-
           <div className="flex border-b overflow-x-auto">
             {tabs.map((tab) => (
                 <button
                     key={tab}
-                    className={`flex-shrink-0 py-3 px-4 text-sm ${activeTab === tab ? 'border-b-2 border-blue-500 font-bold' : ''}`}
+                    className={`flex-shrink-0 py-3 px-4 text-sm 
+                    hover:outline-none hover:ring-teal-500 hover:border-teal-500
+                    focus:outline-none focus:ring-teal-500 focus:border-teal-500 ${activeTab === tab ? 'border-b-2 border-teal-400 font-bold' : ''}`}
                     onClick={() => setActiveTab(tab)}
                 >
                   {tab}
@@ -134,7 +139,9 @@ const RestaurantList = () => {
                       <span className="text-sm font-medium">{restaurant.rating.toFixed(1)}</span>
                       <span className="text-sm text-gray-500 ml-1">({restaurant.reviewCount})</span>
                     </div>
-                    {restaurant.max !== 0 && <p className="text-sm text-gray-500 mb-1">{restaurant.min}-{restaurant.max}분</p>}
+                    <p className="text-sm text-gray-500 mb-1">
+                      {restaurant.min > 0 ? `${restaurant.min}-${restaurant.max}분` : ''}
+                    </p>
                     <p className="text-sm text-gray-500">최소주문 {restaurant.minimumOrderAmount.toLocaleString()}원</p>
                   </div>
                   <div className="w-20 h-20 bg-gray-200 rounded-lg ml-4 flex-shrink-0"></div>
@@ -151,9 +158,9 @@ const RestaurantList = () => {
           {!isLoading && !hasMore && <p className="text-center py-4">더 이상 표시할 레스토랑이 없습니다.</p>}
         </div>
 
-        <div className="sticky bottom-0 bg-blue-500 text-white p-4 rounded-t-lg text-center">
-          <p className="font-bold">배달료 무료 프로 가입</p>
-          <p className="text-sm">가게별 배달팁으로 모으는 프로</p>
+        <div className="sticky bottom-0 bg-teal-400 text-white p-4 rounded-t-lg text-center">
+          <p className="font-bold">배민 클럽으로 무료 배달</p>
+          <p className="text-sm">지금 가입하세요!! ~~</p>
         </div>
 
         <LocationModal
