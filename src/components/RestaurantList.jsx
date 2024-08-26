@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {ChevronLeft, MapPin, Search, ShoppingCart, Star} from 'lucide-react';
 import LocationModal from './LocationModal';
 import RegisterRestaurant from './RegisterRestaurant.jsx';
+import SearchRanking from './SearchRanking';
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -14,6 +15,11 @@ const RestaurantList = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const observer = useRef();
+
+  const handleSelectKeyword = (selectedKeyword) => {
+    setKeyword(selectedKeyword);
+    handleSearch({ preventDefault: () => {} });
+  };
 
   const lastRestaurantElementRef = useCallback(node => {
     if (isLoading) {
@@ -87,19 +93,15 @@ const RestaurantList = () => {
             <button className="mr-4">
               <ChevronLeft size={24}/>
             </button>
-            <form onSubmit={handleSearch} className="flex-grow relative">
-              <input
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="검색어 입력"
-                  className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100 border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
-              <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={20}
-              />
-            </form>
+            <div className="flex-grow relative">
+              <form onSubmit={handleSearch} className="relative">
+                <SearchRanking onSelectKeyword={handleSelectKeyword}/>
+                <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                />
+              </form>
+            </div>
             <button className="ml-4">
               <ShoppingCart size={24}/>
             </button>
@@ -193,7 +195,7 @@ const RestaurantList = () => {
               </div>
           ))}
 
-          {isLoading && <p className="text-center py-4">로딩 중...</p>}
+          {isLoading && <p className="text-center py-4">두근 두근</p>}
           {!isLoading && !hasMore && (
               <p className="text-center py-4">더 이상 표시할 식당이 없습니다.</p>
           )}

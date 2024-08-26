@@ -11,6 +11,10 @@
     {
       "source": "/api/v1/menus",
       "destination": "http://3.38.180.124:7002/api/v1/menus"
+    },
+    {
+      "source": "/api/v1/ranking",
+      "destination": "http://3.38.180.124:7002/api/v1/ranking"
     }
   ]
 }
