@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp } from 'lucide-react';
 
-const SearchRanking = ({ onSearch, initialKeyword }) => {
+const SearchRanking = ({ onSearch, keyword, setKeyword }) => {
   const [searchRankings, setSearchRankings] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [keyword, setKeyword] = useState(initialKeyword);
 
   useEffect(() => {
     fetchSearchRankings();
@@ -22,11 +21,13 @@ const SearchRanking = ({ onSearch, initialKeyword }) => {
 
   const handleInputChange = useCallback((e) => {
     setKeyword(e.target.value);
-  }, []);
+  }, [setKeyword]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    onSearch(keyword);
+    if (keyword.trim()) {
+      onSearch(keyword);
+    }
     setIsVisible(false);
   }, [keyword, onSearch]);
 
@@ -34,7 +35,7 @@ const SearchRanking = ({ onSearch, initialKeyword }) => {
     setKeyword(selectedKeyword);
     onSearch(selectedKeyword);
     setIsVisible(false);
-  }, [onSearch]);
+  }, [onSearch, setKeyword]);
 
   return (
       <form onSubmit={handleSubmit} className="relative">

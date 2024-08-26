@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Clock } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-const SearchRankingDisplay = () => {
+const SearchRankingDisplay = ({ onKeywordClick }) => {
   const [searchRankings, setSearchRankings] = useState([]);
   const [currentDateTime, setCurrentDateTime] = useState('');
 
@@ -27,8 +28,16 @@ const SearchRankingDisplay = () => {
     const month = now.getMonth() + 1;
     const day = now.getDate();
     const hour = now.getHours();
+    const minute = now.getMinutes();
 
-    setCurrentDateTime(`${month}월 ${day}일 ${hour}시 기준`);
+    setCurrentDateTime(`${month}월 ${day}일 ${hour}시 ${minute}분 기준`);
+  };
+
+  const getColorClass = (rank) => {
+    if (rank === 1) return 'text-red-500';
+    if (rank === 2) return 'text-orange-500';
+    if (rank === 3) return 'text-yellow-500';
+    return 'text-gray-500';
   };
 
   return (
@@ -45,14 +54,22 @@ const SearchRankingDisplay = () => {
         </div>
         <ul className="grid grid-cols-2 gap-2">
           {searchRankings.map((item) => (
-              <li key={item.rank} className="flex items-center">
-                <span className="mr-2 text-sm font-medium text-teal-500">{item.rank}</span>
+              <li
+                  key={item.rank}
+                  className="flex items-center cursor-pointer hover:bg-gray-100 p-1 rounded"
+                  onClick={() => onKeywordClick(item.keyword)}
+              >
+                <span className={`mr-2 text-sm font-medium ${getColorClass(item.rank)}`}>{item.rank}</span>
                 <span className="text-sm">{item.keyword}</span>
               </li>
           ))}
         </ul>
       </div>
   );
+};
+
+SearchRankingDisplay.propTypes = {
+  onKeywordClick: PropTypes.func.isRequired,
 };
 
 export default SearchRankingDisplay;

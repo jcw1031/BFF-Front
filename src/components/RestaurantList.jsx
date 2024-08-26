@@ -32,6 +32,7 @@ const RestaurantList = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [pageNumber, setPageNumber] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const observer = useRef();
 
@@ -92,12 +93,29 @@ const RestaurantList = () => {
     setKeyword(event.target.value);
   }, []);
 
-  const handleSelectKeyword = useCallback((selectedKeyword) => {
-    setKeyword(selectedKeyword);
+  const handleSearch = useCallback((searchKeyword) => {
+    setSearchTerm(searchKeyword);
     setRestaurants([]);
     setHasMore(true);
     setPageNumber(0);
-    fetchData(selectedKeyword, 0, true);
+    fetchData(searchKeyword, 0, true);
+    setActiveTab('전체'); // Switch back to '전체' tab after search
+  }, [fetchData]);
+
+  const handleKeywordSelect = useCallback((selectedKeyword) => {
+    setKeyword(selectedKeyword);
+    handleSearch(selectedKeyword);
+  }, [handleSearch]);
+
+  const handleSelectKeyword = useCallback((selectedKeyword) => {
+    if (selectedKeyword) {
+      setKeyword(selectedKeyword);
+      setRestaurants([]);
+      setHasMore(true);
+      setPageNumber(0);
+      fetchData(selectedKeyword, 0, true);
+      setActiveTab('전체'); // Switch back to '전체' tab after search
+    }
   }, [fetchData]);
 
   const handleLocationChange = (newLocation) => {
@@ -109,8 +127,10 @@ const RestaurantList = () => {
   };
 
   useEffect(() => {
-    fetchData(keyword, 0, true);
-  }, [fetchData, keyword]);
+    if (searchTerm) {
+      fetchData(searchTerm, 0, true);
+    }
+  }, [searchTerm, fetchData]);
 
   const tabs = ['전체', '인기 검색어', '배달', '가게 등록'];
 
@@ -123,8 +143,9 @@ const RestaurantList = () => {
             </button>
             <div className="flex-grow relative">
               <SearchRanking
-                  onSearch={handleSelectKeyword}
+                  onSearch={handleSearch}
                   keyword={keyword}
+                  setKeyword={setKeyword}
               />
             </div>
             <button className="ml-4">
@@ -175,6 +196,10 @@ const RestaurantList = () => {
         </div>
 
         <div className="p-4">
+          {activeTab === '인기 검색어' ? (
+              <SearchRankingDisplay onKeywordClick={handleKeywordSelect} />
+          ) : (
+              <>
           {restaurants.map((restaurant, index) => (
               <div
                   key={restaurant.restaurantUuid}
@@ -242,6 +267,8 @@ const RestaurantList = () => {
               <>
                 <SearchRankingDisplay />
                 <p className="text-center py-4">더 이상 표시할 식당이 없습니다.</p>
+              </>
+          )}
               </>
           )}
         </div>
