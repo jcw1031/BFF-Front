@@ -15,12 +15,8 @@ const RestaurantList = () => {
   const [deliveryLocation, setDeliveryLocation] = useState('서울특별시 송파구 방이동');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const observer = useRef();
 
-  const handleSelectKeyword = (selectedKeyword) => {
-    setKeyword(selectedKeyword);
-    handleSearch({ preventDefault: () => {} });
-  };
+  const observer = useRef();
 
   const lastRestaurantElementRef = useCallback(node => {
     if (isLoading) {
@@ -65,17 +61,22 @@ const RestaurantList = () => {
     setIsLoading(false);
   }, [deliveryLocation]);
 
-  useEffect(() => {
-    fetchData(pageNumber, keyword);
-  }, [fetchData, pageNumber, keyword]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = useCallback((e) => {
+    if (e) e.preventDefault();
     setPageNumber(0);
     setRestaurants([]);
     setHasMore(true);
     fetchData(0, keyword);
-  };
+  }, [keyword, fetchData]);
+
+  const handleKeywordChange = useCallback((newKeyword) => {
+    setKeyword(newKeyword);
+  }, []);
+
+  const handleSelectKeyword = useCallback((selectedKeyword) => {
+    setKeyword(selectedKeyword);
+    handleSearch();
+  }, [handleSearch]);
 
   const handleLocationChange = (newLocation) => {
     setDeliveryLocation(newLocation);
@@ -85,7 +86,12 @@ const RestaurantList = () => {
     fetchData(0, keyword);
   };
 
-  const tabs = ['전체', '배달 99+', '포장 99+', '장보기.쇼핑 99+', '가게 등록'];
+  useEffect(() => {
+    console.log('Current keyword:', keyword); // 디버깅을 위한 로그
+  }, [keyword]);
+
+
+  const tabs = ['전체', '인기 검색어', '배달', '가게 등록'];
 
   return (
       <div className="max-w-md mx-auto bg-gray-100 min-h-screen">
@@ -96,7 +102,11 @@ const RestaurantList = () => {
             </button>
             <div className="flex-grow relative">
               <form onSubmit={handleSearch} className="relative">
-                <SearchRanking onSelectKeyword={handleSelectKeyword}/>
+                <SearchRanking
+                    onSelectKeyword={handleSelectKeyword}
+                    onKeywordChange={handleKeywordChange}
+                    keyword={keyword}
+                />
                 <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                     size={20}

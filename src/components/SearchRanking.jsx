@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp } from 'lucide-react';
 
-const SearchRanking = ({ onSelectKeyword }) => {
+const SearchRanking = ({ onSelectKeyword, onKeywordChange, keyword }) => {
   const [searchRankings, setSearchRankings] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -19,11 +19,22 @@ const SearchRanking = ({ onSelectKeyword }) => {
     }
   };
 
+  const handleInputChange = useCallback((e) => {
+    onKeywordChange(e.target.value);
+  }, [onKeywordChange]);
+
+  const handleKeywordSelect = useCallback((selectedKeyword) => {
+    onSelectKeyword(selectedKeyword);
+    setIsVisible(false);
+  }, [onSelectKeyword]);
+
   return (
       <div className="relative">
         <input
             type="text"
             placeholder="검색어 입력"
+            value={keyword}
+            onChange={handleInputChange}
             onFocus={() => setIsVisible(true)}
             onBlur={() => setTimeout(() => setIsVisible(false), 200)}
             className="w-full py-2 pl-10 pr-4 border rounded-full bg-gray-100 border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -39,7 +50,7 @@ const SearchRanking = ({ onSelectKeyword }) => {
                     <li
                         key={item.rank}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                        onClick={() => onSelectKeyword(item.keyword)}
+                        onClick={() => handleKeywordSelect(item.keyword)}
                     >
                       <span className="mr-2 text-sm font-medium text-teal-500">{item.rank}</span>
                       <span className="text-sm">{item.keyword}</span>

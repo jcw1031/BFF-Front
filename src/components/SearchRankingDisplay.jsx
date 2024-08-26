@@ -24,7 +24,6 @@ const SearchRankingDisplay = () => {
 
   const updateDateTime = () => {
     const now = new Date();
-    const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const day = now.getDate();
     const hour = now.getHours();
@@ -35,7 +34,7 @@ const SearchRankingDisplay = () => {
   return (
       <div className="bg-white rounded-lg shadow-md p-4 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold flex items-center">
+          <h3 className="text-sm font-semibold flex items-center">
             <TrendingUp size={20} className="mr-2 text-teal-500" />
             인기 검색어 순위
           </h3>
