@@ -24,7 +24,7 @@ const getRandomFoodImage = () => {
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
-  const [activeTab, setActiveTab] = useState('배달 99+');
+  const [activeTab, setActiveTab] = useState('인기 검색어');
   const [keyword, setKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -107,7 +107,7 @@ const RestaurantList = () => {
     handleSearch(selectedKeyword);
   }, [handleSearch]);
 
-  const handleSelectKeyword = useCallback((selectedKeyword) => {
+  useCallback((selectedKeyword) => {
     if (selectedKeyword) {
       setKeyword(selectedKeyword);
       setRestaurants([]);
