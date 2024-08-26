@@ -3,6 +3,14 @@
     {
       "source": "/api/v1/restaurant-summary/cache",
       "destination": "http://3.34.104.102:8080/api/v1/restaurant-summary/cache"
+    },
+    {
+      "source": "/api/v1/restaurants",
+      "destination": "http://3.38.180.124:8080/api/v1/restaurants"
+    },
+    {
+      "source": "/api/v1/menus",
+      "destination": "http://3.38.180.124:8080/api/v1/menus"
     }
   ]
 }
