@@ -5,51 +5,53 @@ import RegisterRestaurant from './RegisterRestaurant';
 import SearchRanking from './SearchRanking';
 import SearchRankingDisplay from './SearchRankingDisplay'
 
+const foodImages = [
+  'img1.jpg',
+  'img2.jpg',
+  'img3.jpg',
+  'img4.jpg',
+  'img5.jpg',
+  'img6.jpg',
+  'img7.jpg',
+  'img8.jpg',
+  'img9.jpg',
+];
+
+const getRandomFoodImage = () => {
+  const randomIndex = Math.floor(Math.random() * foodImages.length);
+  return `/img/${foodImages[randomIndex]}`;
+};
+
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [activeTab, setActiveTab] = useState('배달 99+');
-  const [pageNumber, setPageNumber] = useState(0);
-  const [keyword, setKeyword] = useState('치킨');
+  const [keyword, setKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [deliveryLocation, setDeliveryLocation] = useState('서울특별시 송파구 방이동');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [pageNumber, setPageNumber] = useState(0);
 
   const observer = useRef();
 
-  const lastRestaurantElementRef = useCallback(node => {
-    if (isLoading) {
-      return;
-    }
-    if (observer.current) {
-      observer.current.disconnect();
-    }
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        setPageNumber(prevPageNumber => prevPageNumber + 1);
-      }
-    });
-    if (node) {
-      observer.current.observe(node);
-    }
-  }, [isLoading, hasMore]);
-
-  const fetchData = useCallback(async (page, searchKeyword) => {
+  const fetchData = useCallback(async (searchKeyword, page = 0, isNewSearch = false) => {
     setIsLoading(true);
     try {
       const formattedDeliveryLocation = deliveryLocation.replace(/\s+/g, '_');
-      console.log(searchKeyword + " " + formattedDeliveryLocation);
+      console.log(`Fetching data for keyword: ${searchKeyword}, page: ${page}, location: ${formattedDeliveryLocation}`);
       const response = await fetch(
-          `/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=${formattedDeliveryLocation}&pageNumber=${page}`);
+          `/api/v1/restaurant-summary/cache?keyword=${searchKeyword}&deliveryLocation=${formattedDeliveryLocation}&pageNumber=${page}`
+      );
       const data = await response.json();
       if (data.success && Array.isArray(data.response)) {
-        if (page === 0) {
-          setRestaurants(data.response);
-        } else {
-          setRestaurants(prev => [...prev, ...data.response]);
-        }
+        const restaurantsWithImages = data.response.map(restaurant => ({
+          ...restaurant,
+          foodImage: getRandomFoodImage()
+        }));
+        setRestaurants(prev => isNewSearch ? restaurantsWithImages : [...prev, ...restaurantsWithImages]);
         setHasMore(data.response.length > 0);
+        setPageNumber(page);
       } else {
         console.error('Invalid data format:', data);
         setHasMore(false);
@@ -61,35 +63,54 @@ const RestaurantList = () => {
     setIsLoading(false);
   }, [deliveryLocation]);
 
-  const handleSearch = useCallback((e) => {
-    if (e) e.preventDefault();
-    setPageNumber(0);
-    setRestaurants([]);
+  useCallback((event) => {
+    event.preventDefault();
+    setRestaurants([]); // Reset restaurants list
     setHasMore(true);
-    fetchData(0, keyword);
-  }, [keyword, fetchData]);
+    setPageNumber(0);
+    fetchData(keyword, 0, true);
+  }, [fetchData, keyword]);
 
-  const handleKeywordChange = useCallback((newKeyword) => {
-    setKeyword(newKeyword);
+  const loadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      fetchData(keyword, pageNumber + 1, false);
+    }
+  }, [isLoading, hasMore, fetchData, keyword, pageNumber]);
+
+  const lastRestaurantElementRef = useCallback(node => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore, loadMore]);
+
+  const handleKeywordChange = useCallback((event) => {
+    setKeyword(event.target.value);
   }, []);
 
   const handleSelectKeyword = useCallback((selectedKeyword) => {
     setKeyword(selectedKeyword);
-    handleSearch();
-  }, [handleSearch]);
+    setRestaurants([]);
+    setHasMore(true);
+    setPageNumber(0);
+    fetchData(selectedKeyword, 0, true);
+  }, [fetchData]);
 
   const handleLocationChange = (newLocation) => {
     setDeliveryLocation(newLocation);
-    setPageNumber(0);
     setRestaurants([]);
     setHasMore(true);
-    fetchData(0, keyword);
+    setPageNumber(0);
+    fetchData(keyword, 0, true);
   };
 
   useEffect(() => {
-    console.log('Current keyword:', keyword); // 디버깅을 위한 로그
-  }, [keyword]);
-
+    fetchData(keyword, 0, true);
+  }, [fetchData, keyword]);
 
   const tabs = ['전체', '인기 검색어', '배달', '가게 등록'];
 
@@ -101,17 +122,10 @@ const RestaurantList = () => {
               <ChevronLeft size={24}/>
             </button>
             <div className="flex-grow relative">
-              <form onSubmit={handleSearch} className="relative">
-                <SearchRanking
-                    onSelectKeyword={handleSelectKeyword}
-                    onKeywordChange={handleKeywordChange}
-                    keyword={keyword}
-                />
-                <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={20}
-                />
-              </form>
+              <SearchRanking
+                  onSearch={handleSelectKeyword}
+                  keyword={keyword}
+              />
             </div>
             <button className="ml-4">
               <ShoppingCart size={24}/>
@@ -168,41 +182,58 @@ const RestaurantList = () => {
                       ? lastRestaurantElementRef : null}
                   className="bg-white rounded-lg p-4 mb-4 shadow"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-grow">
+                <div className="flex justify-between">
+                  <div className="flex-grow pr-4 max-w-[calc(100%-5rem)]">
                     <div className="flex items-center mb-1">
-                      <h3 className="font-semibold text-base">{restaurant.restaurantName}</h3>
+                      <h3 className="font-semibold text-base truncate">{restaurant.restaurantName}</h3>
                       {restaurant.hasAdvertisement && (
                           <span
-                              className="ml-2 text-xs font-medium text-gray-500 border border-gray-500 rounded px-1">광고</span>
+                              className="ml-2 text-xs font-medium text-gray-500 border border-gray-500 rounded px-1 flex-shrink-0">광고</span>
                       )}
                     </div>
                     <div className="flex items-center mb-1">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1"/>
+                      <Star
+                          className="h-4 w-4 text-yellow-400 mr-1 flex-shrink-0"/>
                       <span className="text-sm font-medium">
-              {restaurant.rating.toFixed(1)}
-            </span>
+                        {restaurant.rating.toFixed(1)}
+                      </span>
                       <span className="text-xs text-gray-500 ml-1">
-              리뷰 {restaurant.reviewCount}
-            </span>
+                        리뷰 {restaurant.reviewCount}
+                      </span>
                     </div>
                     <p className="text-xs text-gray-500 mb-1">
                       {restaurant.min > 0
                           ? `${restaurant.min}-${restaurant.max}분` : ''}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-teal-500 overflow-hidden text-ellipsis"
+                       style={{
+                         display: '-webkit-box',
+                         WebkitLineClamp: 1,
+                         WebkitBoxOrient: 'vertical'
+                       }}>
+                      {restaurant.menus}
+                    </p>
+                    <p className="text-xs text-gray-500 mb-1">
                       최소주문 {restaurant.minimumOrderAmount.toLocaleString()}원
                     </p>
+                    {restaurant.hasCoupon && (
+                        <div
+                            className="mt-1 inline-block bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
+                          {restaurant.couponName}
+                        </div>
+                    )}
                   </div>
                   <div
-                      className="w-20 h-20 bg-gray-200 rounded-lg ml-4 flex-shrink-0"></div>
+                      className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                    {restaurant.foodImage && (
+                        <img
+                            src={restaurant.foodImage}
+                            alt={restaurant.restaurantName}
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                  </div>
                 </div>
-                {restaurant.hasCoupon && (
-                    <div
-                        className="mt-2 inline-block bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
-                      {restaurant.couponName}
-                    </div>
-                )}
               </div>
           ))}
 
