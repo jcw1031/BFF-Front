@@ -1,8 +1,9 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {ChevronLeft, MapPin, Search, ShoppingCart, Star} from 'lucide-react';
 import LocationModal from './LocationModal';
-import RegisterRestaurant from './RegisterRestaurant.jsx';
+import RegisterRestaurant from './RegisterRestaurant';
 import SearchRanking from './SearchRanking';
+import SearchRankingDisplay from './SearchRankingDisplay'
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -195,9 +196,12 @@ const RestaurantList = () => {
               </div>
           ))}
 
-          {isLoading && <p className="text-center py-4">두근 두근</p>}
+          {isLoading && <p className="text-center py-4">로딩 중...</p>}
           {!isLoading && !hasMore && (
-              <p className="text-center py-4">더 이상 표시할 식당이 없습니다.</p>
+              <>
+                <SearchRankingDisplay />
+                <p className="text-center py-4">더 이상 표시할 식당이 없습니다.</p>
+              </>
           )}
         </div>
 
