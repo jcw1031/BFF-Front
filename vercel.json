@@ -14,7 +14,7 @@
     },
     {
       "source": "/api/v1/ranking",
-      "destination": "http://3.38.180.124:7002/api/v1/ranking"
+      "destination": "http://3.38.180.124:7001/api/v1/ranking"
     }
   ]
 }
