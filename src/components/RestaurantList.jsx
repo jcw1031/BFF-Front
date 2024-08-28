@@ -25,7 +25,7 @@ const getRandomFoodImage = () => {
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [activeTab, setActiveTab] = useState('인기 검색어');
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState('치킨');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [deliveryLocation, setDeliveryLocation] = useState('서울특별시 송파구 방이동');
